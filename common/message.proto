@@ -1,0 +1,48 @@
+syntax = "proto2";
+
+message PingTest {
+  required uint32 num = 1;
+}
+
+message PinModeControl {
+  required uint32 pin = 1;
+  enum Mode {
+    INPUT = 0;
+    OUTPUT = 1;
+    INPUT_PULLUP = 2;
+  }
+  required Mode mode = 2;
+}
+
+message IOReadWrite {
+  required uint32 pin = 1;
+  enum Operation {
+    DIGITAL_READ  = 0;
+    DIGITAL_WRITE = 1;
+    ANALOG_READ   = 2;
+    ANALOG_WRITE  = 3;
+  }
+  required Operation operation = 2;
+  optional uint32 val = 3;
+}
+
+message ServoControl {
+  required uint32 pin = 1;
+  enum Operation {
+    ATTACH = 0;
+    DETACH = 1;
+    WRITE = 2;
+    READ = 3;
+  }
+  required Operation operation = 2;
+  optional uint32 val = 3;
+}
+
+message Message {
+  oneof msg {
+    PingTest ping_test = 1;
+    PinModeControl pin_mode_control = 2;
+    IOReadWrite io_read_write = 3;
+    ServoControl servo_control = 4;
+  }
+}
