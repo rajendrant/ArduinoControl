@@ -5,8 +5,7 @@ import time
 
 class TcpSocket(object):
     def __init__(self, host, port):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((host, port))
+        self.sock = socket.create_connection((host, port), 2000)
         self.poll = select.poll()
         self.poll.register(self.sock, select.POLLIN | select.POLLPRI | select.POLLHUP |
                            select.POLLERR | select.POLLNVAL)

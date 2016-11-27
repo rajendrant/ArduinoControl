@@ -1,6 +1,7 @@
-import random
-import myutil
 import message_pb2
+import myutil
+import random
+import socket
 import struct
 import time
 
@@ -8,7 +9,15 @@ class BoardClient:
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.sock = myutil.TcpSocket(host, port)
+        for tries in range(4):
+            try:
+                self.sock = myutil.TcpSocket(host, port)
+                return
+            except socket.error as e:
+                print 'retrying connect'
+                time.sleep(1)
+                continue
+        raise socket.error('Could not connect even after retries')
 
     def ping_test(self):
         m = message_pb2.Message()
@@ -23,13 +32,21 @@ class BoardClient:
         return Servo(pin, self)
 
     def send_and_recv(self, msg):
-        self.send_msg(msg)
-        return self.recv_msg()
-    
+        for tries in range(4):
+            try:
+                self.send_msg(msg)
+                return self.recv_msg()
+            except socket.error as e:
+                print 'retrying send recv'
+                time.sleep(1)
+                continue
+        raise socket.error('send_and_recv failed')
+
     def send_msg(self, msg):
         data = msg.SerializeToString()
         self.sock.send(struct.pack('B', len(data)))
         self.sock.send(data)
+        #print ''.join(x.encode('hex') for x in struct.pack('B', len(data)) + data)
 
     def recv_msg(self):
         msglen = self.sock.recvall(1, timeout=4000)
@@ -104,24 +121,4 @@ class Servo:
         m.servo_control.operation = oper
         m.servo_control.val = val
         return self.client.send_and_recv(m)
-        
-def test():
-    b = BoardClient('192.168.1.105', 6666)
-    for i in range(4):
-        print 'ping_test', 'PASSED' if b.ping_test() else 'FAILED'
-    s=b.get_servo(14)
-    s.attach()
-    s.write(170)
-    time.sleep(0.5)
-    s.write(0)
-    time.sleep(0.5)
-    s.detach()
 
-def test2():
-    b = BoardClient('192.168.1.105', 6666)
-    b.get_pin(4).digital_write(0)
-    b.get_pin(5).digital_write(0)
-    b.get_pin(2).digital_write(0)
-    b.get_pin(16).digital_write(0)
-            
-test2()

@@ -142,28 +142,23 @@ void processRequest(Client* client) {
   }
 }
 
+
+int servo_pins[][2] = {{14, 180}, {12, 0}, {5, 0}};
+int input_pins[] = {0, 2, 4, 13, 15, 16};
+
 void setup() {
   //Serial.begin(115200);
+  // Servo connected pins.
+  for(int i=0; i<3; i++) {
+    Servo s;
+    s.attach(servo_pins[i][0]);
+    s.write(servo_pins[i][1]);
+  }
 
   // Start with all pins as OUTPUT
-  pinMode(0, OUTPUT);
-  pinMode(2, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(5, OUTPUT);
-  pinMode(12, OUTPUT);
-  pinMode(13, OUTPUT);
-  pinMode(14, OUTPUT);
-  pinMode(15, OUTPUT);
-  pinMode(16, OUTPUT);
-  digitalWrite(0, HIGH);
-  digitalWrite(2, HIGH);
-  digitalWrite(4, HIGH);
-  digitalWrite(5, HIGH);
-  digitalWrite(12, HIGH);
-  digitalWrite(13, HIGH);
-  digitalWrite(14, HIGH);
-  digitalWrite(15, HIGH);
-  digitalWrite(16, HIGH);
+  for(int i=0; i<sizeof(input_pins)/sizeof(int); i++) {
+    pinMode(input_pins[i], OUTPUT);
+  }
 
   connectToWiFi();
 }
