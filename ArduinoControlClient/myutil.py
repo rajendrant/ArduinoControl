@@ -3,6 +3,18 @@ import select
 import struct
 import time
 
+def logger(fn):
+    from functools import wraps
+    import inspect
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        #print time.time(), 'START', fn.__name__, '\r'
+        out = apply(fn, args, kwargs)
+        #print time.time(), 'END', fn.__name__, '\r'
+        return out
+    return wrapper
+
+
 class TcpSocket(object):
     def __init__(self, host, port):
         self.sock = socket.create_connection((host, port), 2000)

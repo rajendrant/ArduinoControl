@@ -167,16 +167,19 @@ WiFiClient clients[MAX_CLIENTS];
 int client_end = 0;
 
 void loop() {
-  for(int t=0; t<10; t++) {
-    delay(100);
-    clients[client_end] = server.available();
-    if (clients[client_end]) {
-      client_end = (client_end+1) % MAX_CLIENTS;
-    }
-    for(int i=0; i < MAX_CLIENTS; i++) {
-      if (clients[i])
-        processRequest(&clients[i]);
-    }
+  static int connectivity_check = 0;
+
+  clients[client_end] = server.available();
+  if (clients[client_end]) {
+    client_end = (client_end+1) % MAX_CLIENTS;
   }
-  checkConnectivity();
+  for(int i=0; i < MAX_CLIENTS; i++) {
+    if (clients[i])
+      processRequest(&clients[i]);
+  }
+  if(++connectivity_check == 1000) {
+    checkConnectivity();
+    connectivity_check = 0;
+  }
+  delay(10);
 }

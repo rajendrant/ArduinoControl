@@ -1,9 +1,12 @@
 import ArduinoControlClient
+import time
 
 def ping_test():
     b = ArduinoControlClient.BoardClient('192.168.1.105', 6666)
     for i in range(4):
-        print 'ping_test', 'PASSED' if b.ping_test() else 'FAILED'
+        latency = b.ping_test()
+        print 'ping_test', 'PASSED latency=%d'%(latency) if latency else 'FAILED'
+        time.sleep(0.5)
 
 def test():
     b = ArduinoControlClient.BoardClient('192.168.1.105', 6666)

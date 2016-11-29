@@ -25,12 +25,16 @@ class BoardClient:
     def ping_test(self):
         """
         Sends a random number in the ping request and expects the same number in
-        the ping response.
+        the ping response. Returns None on failure. On success returns the
+        latency time in milliseconds.
         """
+        start_time=time.time()
         m = message_pb2.Message()
         m.ping_test.num = random.randrange(1000000)
         resp = self.send_and_recv(m)
-        return resp and resp.HasField('ping_test') and m.ping_test.num==resp.ping_test.num
+        if resp and resp.HasField('ping_test') and m.ping_test.num==resp.ping_test.num:
+            return (time.time()-start_time)*1000
+        return None
 
     def get_pin(self, pin):
         return BoardPin(pin, self)
