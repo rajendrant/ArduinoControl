@@ -133,12 +133,10 @@ void checkConnectivity() {
 }
 
 void processRequest(Client* client) {
-  while (client->connected()) {
-    while (client->available()) {
-      Message req = Message_init_zero;
-      if (receive_message(&req, client))
-        handle_message(&req, client);
-    }
+  if (client->connected() && client->available()) {
+    Message req = Message_init_zero;
+    if (receive_message(&req, client))
+      handle_message(&req, client);
   }
 }
 
@@ -153,6 +151,7 @@ void setup() {
     Servo s;
     s.attach(servo_pins[i][0]);
     s.write(servo_pins[i][1]);
+    s.detach();
   }
 
   // Start with all pins as OUTPUT
@@ -163,12 +162,20 @@ void setup() {
   connectToWiFi();
 }
 
+#define MAX_CLIENTS 4
+WiFiClient clients[MAX_CLIENTS];
+int client_end = 0;
+
 void loop() {
   for(int t=0; t<10; t++) {
     delay(100);
-    WiFiClient client = server.available();
-    if (client) {
-      processRequest(&client);
+    clients[client_end] = server.available();
+    if (clients[client_end]) {
+      client_end = (client_end+1) % MAX_CLIENTS;
+    }
+    for(int i=0; i < MAX_CLIENTS; i++) {
+      if (clients[i])
+        processRequest(&clients[i]);
     }
   }
   checkConnectivity();

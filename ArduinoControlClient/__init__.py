@@ -9,17 +9,24 @@ class BoardClient:
     def __init__(self, host, port):
         self.host = host
         self.port = port
+        self.init_sock()
+
+    def init_sock(self):
         for tries in range(4):
             try:
-                self.sock = myutil.TcpSocket(host, port)
+                self.sock = myutil.TcpSocket(self.host, self.port)
                 return
             except socket.error as e:
                 print 'retrying connect'
-                time.sleep(1)
+                time.sleep(0.1)
                 continue
         raise socket.error('Could not connect even after retries')
 
     def ping_test(self):
+        """
+        Sends a random number in the ping request and expects the same number in
+        the ping response.
+        """
         m = message_pb2.Message()
         m.ping_test.num = random.randrange(1000000)
         resp = self.send_and_recv(m)
@@ -32,14 +39,21 @@ class BoardClient:
         return Servo(pin, self)
 
     def send_and_recv(self, msg):
-        for tries in range(4):
-            try:
-                self.send_msg(msg)
-                return self.recv_msg()
-            except socket.error as e:
-                print 'retrying send recv'
-                time.sleep(1)
-                continue
+        for connect_tries in range(3):
+            if not self.sock.is_connected():
+                try:
+                    self.init_sock()
+                except socket.error as e:
+                    continue
+            if self.sock.is_connected():
+                for send_tries in range(2):
+                    try:
+                        self.send_msg(msg)
+                        return self.recv_msg()
+                    except socket.error as e:
+                        print 'retrying send recv'
+                        time.sleep(0.1)
+                        continue
         raise socket.error('send_and_recv failed')
 
     def send_msg(self, msg):
