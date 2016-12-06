@@ -6,12 +6,22 @@ import struct
 import time
 
 class BoardClient:
-    def __init__(self, host, port):
+    def __init__(self, host, port, use_udp=True):
         self.host = host
         self.port = port
+        self.use_udp = use_udp
         self.init_sock()
 
     def init_sock(self):
+        if self.use_udp:
+            self.init_udp_sock()
+        else:
+            self.init_tcp_sock()
+
+    def init_udp_sock(self):
+        self.sock = myutil.UdpSocket(self.host, self.port)
+
+    def init_tcp_sock(self):
         for tries in range(4):
             try:
                 self.sock = myutil.TcpSocket(self.host, self.port)
@@ -61,16 +71,10 @@ class BoardClient:
         raise socket.error('send_and_recv failed')
 
     def send_msg(self, msg):
-        data = msg.SerializeToString()
-        self.sock.send(struct.pack('B', len(data)))
-        self.sock.send(data)
-        #print ''.join(x.encode('hex') for x in struct.pack('B', len(data)) + data)
+        self.sock.send_msg(msg.SerializeToString())
 
     def recv_msg(self):
-        msglen = self.sock.recvall(1, timeout=4000)
-        if not msglen:
-            return None
-        msg = self.sock.recvall(ord(msglen), timeout=4000)
+        msg = self.sock.recv_msg()
         if not msg:
             return None
         m = message_pb2.Message()

@@ -15,6 +15,24 @@ def logger(fn):
     return wrapper
 
 
+class UdpSocket(object):
+    def __init__(self, host, port):
+        self.host, self.port = host, port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def is_connected(self):
+        return True
+
+    def send_msg(self, data):
+        # One message consists of one byte message length followed by message.
+        self.sock.sendto(struct.pack('B', len(data))+data, (self.host, self.port))
+        return True
+
+    def recv_msg(self, timeout=2000):
+        # One message consists of one byte message length followed by message.
+        data, addr = self.sock.recvfrom(1024)
+        return data[1:]
+
 class TcpSocket(object):
     def __init__(self, host, port):
         self.sock = socket.create_connection((host, port), 2000)
@@ -43,6 +61,10 @@ class TcpSocket(object):
             return True
         return self.sock.sendall(data)
 
+    def send_msg(self, data):
+        # One message consists of one byte message length followed by message.
+        self.sock.send(struct.pack('B', len(data))+data)
+
     def recvall(self, count, timeout=2000):
         start = time.time()
         while len(self.rd_buf) < count:
@@ -59,6 +81,14 @@ class TcpSocket(object):
         buf = self.rd_buf
         self.rd_buf = b''
         return buf
+
+    def recv_msg(self):
+        msg = self.sock.recv_msg()
+        msglen = self.sock.recvall(1)
+        if not msglen:
+            return None
+        msg = self.sock.recvall(ord(msglen))
+        return msg
 
     def _recv(self, count, timeout):
         while self.poll.poll(timeout) and self.is_connected():
