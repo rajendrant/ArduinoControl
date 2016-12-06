@@ -19,6 +19,7 @@ class UdpSocket(object):
     def __init__(self, host, port):
         self.host, self.port = host, port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.settimeout(2)
 
     def is_connected(self):
         return True
