@@ -88,7 +88,7 @@ bool process_message(const uint8_t *req, uint8_t req_len, uint8_t **resp, uint8_
   }
   
   pb_ostream_t ostream = pb_ostream_from_buffer(resp_buffer, sizeof(resp_buffer));
-  if (!pb_encode(&ostream, Message_fields, &msg))
+  if (!pb_encode(&ostream, Message_fields, &::resp))
     return false;
 
   *resp = resp_buffer;

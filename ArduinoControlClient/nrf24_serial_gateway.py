@@ -1,6 +1,7 @@
 import serial
 import socket
 import sys
+import base64
 
 def start_serial_gateway():
     dev = sys.argv[1] if len(sys.argv)>1 else '/dev/ttyUSB0'
@@ -13,12 +14,9 @@ def start_serial_gateway():
         req, address = sock.recvfrom(4096)
         if not req:
             continue
-        print(len(req), type(req))
-        print ''.join("{:02x}".format(ord(c)) for c in req[:-1])
-        ser.write(''.join("{:02x}".format(ord(c)) for c in req[:-1]))
+        ser.write(base64.b16encode(req))
         ser.write('\n')
         resp = ser.readline()
-        print resp, len(resp)
-        sock.sendto(req, address)
+        sock.sendto(base64.b16decode(resp[:-2]), address)
 
 start_serial_gateway()

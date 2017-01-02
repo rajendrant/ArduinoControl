@@ -5,32 +5,14 @@ import socket
 import struct
 import time
 
-class BoardClient:
-    def __init__(self, host, port, use_udp=True):
+class BoardClient(object):
+    def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.use_udp = use_udp
         self.init_sock()
 
-    def init_sock(self):
-        if self.use_udp:
-            self.init_udp_sock()
-        else:
-            self.init_tcp_sock()
-
-    def init_udp_sock(self):
-        self.sock = myutil.UdpSocket(self.host, self.port)
-
-    def init_tcp_sock(self):
-        for tries in range(4):
-            try:
-                self.sock = myutil.TcpSocket(self.host, self.port)
-                return
-            except socket.error as e:
-                print 'retrying connect'
-                time.sleep(0.1)
-                continue
-        raise socket.error('Could not connect even after retries')
+    def init_sock():
+        raise NotImplementedError
 
     def ping_test(self):
         """
@@ -80,6 +62,36 @@ class BoardClient:
         m = message_pb2.Message()
         m.ParseFromString(msg)
         return m
+
+class TCPClient(BoardClient):
+    def __init__(self, host, port):
+        super(TCPClient, self).__init__(host, port)
+
+    def init_sock(self):
+        for tries in range(4):
+            try:
+                self.sock = myutil.TcpSocket(self.host, self.port)
+                return
+            except socket.error as e:
+                print 'retrying connect'
+                time.sleep(0.1)
+                continue
+        raise socket.error('Could not connect even after retries')
+
+class UDPClient(BoardClient):
+    def __init__(self, host, port):
+        super(UDPClient, self).__init__(host, port)
+
+    def init_sock(self):
+        self.sock = myutil.UdpSocket(self.host, self.port)
+
+class NRF24Client(UDPClient):
+    def __init__(self, gateway_host, gateway_port, nrf24_id):
+        super(NRF24Client, self).__init__(gateway_host, gateway_port)
+        self.nrf24_id = nrf24_id
+
+    def send_msg(self, msg):
+        self.sock.send_msg(self.nrf24_id + msg.SerializeToString())
 
 class BoardPin:
     def __init__(self, pin, client):

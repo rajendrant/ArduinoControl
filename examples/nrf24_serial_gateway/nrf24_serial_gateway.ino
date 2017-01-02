@@ -9,16 +9,11 @@ void setup()
     Serial.println("NRF24 init failed");
   if (!nrf24.setChannel(1))
     Serial.println("setChannel failed");
-  if (!nrf24.setThisAddress((uint8_t*)"s-1", 3))
-    Serial.println("setThisAddress failed");
-  if (!nrf24.setTransmitAddress((uint8_t*)"s-1", 3))
-    Serial.println("setTransmitAddress failed");
   if (!nrf24.setRF(NRF24::NRF24DataRate2Mbps, NRF24::NRF24TransmitPowerm18dBm))
     Serial.println("setRF failed");
 
-  // Dynamic payload mode.
-  if (!nrf24.setDynamicPayloadMode())
-    Serial.println("setDynamicPayloadMode failed");
+  if (!nrf24.setThisAddress((uint8_t*)"gat", 3))
+    Serial.println("setThisAddress failed");
 }
 
 uint8_t from_hex(uint8_t no) {
@@ -65,19 +60,19 @@ void send_response(uint8_t* resp, uint8_t resp_len) {
 void loop()
 {
   uint8_t req[128];
-  uint8_t *resp;
+  uint8_t resp[128];
   uint8_t req_len, resp_len;
 
   req_len = recv_request(req);
   if (!req_len)
     return;
 
-  nrf24.sendBlocking(req, req_len);
+  nrf24.setTransmitAddress(req, 3);
+  nrf24.sendBlocking(req+3, req_len-3);
 
   nrf24.powerUpRx();
-  resp_len = nrf24.waitAndRecv(req, 20);
+  resp_len = nrf24.waitAndRecv(resp, 400);
   if (resp_len) {
     send_response(resp, resp_len);
   }
-  //send_response(req, req_len);
 }

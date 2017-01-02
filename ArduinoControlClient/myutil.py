@@ -25,14 +25,12 @@ class UdpSocket(object):
         return True
 
     def send_msg(self, data):
-        # One message consists of one byte message length followed by message.
-        self.sock.sendto(struct.pack('B', len(data))+data, (self.host, self.port))
+        self.sock.sendto(data, (self.host, self.port))
         return True
 
     def recv_msg(self, timeout=2000):
-        # One message consists of one byte message length followed by message.
         data, addr = self.sock.recvfrom(1024)
-        return data[1:]
+        return data
 
 class TcpSocket(object):
     def __init__(self, host, port):
