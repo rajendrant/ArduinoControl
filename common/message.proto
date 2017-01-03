@@ -1,5 +1,10 @@
 syntax = "proto2";
 
+// pb_decode.h and pb_decode.c files are generated as follows.
+//  protoc --plugin=protoc-gen-nanopb=generator/protoc-gen-nanopb --nanopb_out=. message.proto
+// message_pb2.py is generated as follows.
+//  protoc -I. --python_out=. message.proto
+
 message PingTest {
   required uint32 num = 1;
 }
@@ -44,5 +49,7 @@ message Message {
     PinModeControl pin_mode_control = 2;
     IOReadWrite io_read_write = 3;
     ServoControl servo_control = 4;
+    uint32 this_address = 5;
+    uint32 system_uptime = 6;
   }
 }

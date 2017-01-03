@@ -18,7 +18,7 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='message.proto',
   package='',
-  serialized_pb=_b('\n\rmessage.proto\"\x17\n\x08PingTest\x12\x0b\n\x03num\x18\x01 \x02(\r\"r\n\x0ePinModeControl\x12\x0b\n\x03pin\x18\x01 \x02(\r\x12\"\n\x04mode\x18\x02 \x02(\x0e\x32\x14.PinModeControl.Mode\"/\n\x04Mode\x12\t\n\x05INPUT\x10\x00\x12\n\n\x06OUTPUT\x10\x01\x12\x10\n\x0cINPUT_PULLUP\x10\x02\"\xa7\x01\n\x0bIOReadWrite\x12\x0b\n\x03pin\x18\x01 \x02(\r\x12)\n\toperation\x18\x02 \x02(\x0e\x32\x16.IOReadWrite.Operation\x12\x0b\n\x03val\x18\x03 \x01(\r\"S\n\tOperation\x12\x10\n\x0c\x44IGITAL_READ\x10\x00\x12\x11\n\rDIGITAL_WRITE\x10\x01\x12\x0f\n\x0b\x41NALOG_READ\x10\x02\x12\x10\n\x0c\x41NALOG_WRITE\x10\x03\"\x8e\x01\n\x0cServoControl\x12\x0b\n\x03pin\x18\x01 \x02(\r\x12*\n\toperation\x18\x02 \x02(\x0e\x32\x17.ServoControl.Operation\x12\x0b\n\x03val\x18\x03 \x01(\r\"8\n\tOperation\x12\n\n\x06\x41TTACH\x10\x00\x12\n\n\x06\x44\x45TACH\x10\x01\x12\t\n\x05WRITE\x10\x02\x12\x08\n\x04READ\x10\x03\"\xac\x01\n\x07Message\x12\x1e\n\tping_test\x18\x01 \x01(\x0b\x32\t.PingTestH\x00\x12+\n\x10pin_mode_control\x18\x02 \x01(\x0b\x32\x0f.PinModeControlH\x00\x12%\n\rio_read_write\x18\x03 \x01(\x0b\x32\x0c.IOReadWriteH\x00\x12&\n\rservo_control\x18\x04 \x01(\x0b\x32\r.ServoControlH\x00\x42\x05\n\x03msg')
+  serialized_pb=_b('\n\rmessage.proto\"\x17\n\x08PingTest\x12\x0b\n\x03num\x18\x01 \x02(\r\"r\n\x0ePinModeControl\x12\x0b\n\x03pin\x18\x01 \x02(\r\x12\"\n\x04mode\x18\x02 \x02(\x0e\x32\x14.PinModeControl.Mode\"/\n\x04Mode\x12\t\n\x05INPUT\x10\x00\x12\n\n\x06OUTPUT\x10\x01\x12\x10\n\x0cINPUT_PULLUP\x10\x02\"\xa7\x01\n\x0bIOReadWrite\x12\x0b\n\x03pin\x18\x01 \x02(\r\x12)\n\toperation\x18\x02 \x02(\x0e\x32\x16.IOReadWrite.Operation\x12\x0b\n\x03val\x18\x03 \x01(\r\"S\n\tOperation\x12\x10\n\x0c\x44IGITAL_READ\x10\x00\x12\x11\n\rDIGITAL_WRITE\x10\x01\x12\x0f\n\x0b\x41NALOG_READ\x10\x02\x12\x10\n\x0c\x41NALOG_WRITE\x10\x03\"\x8e\x01\n\x0cServoControl\x12\x0b\n\x03pin\x18\x01 \x02(\r\x12*\n\toperation\x18\x02 \x02(\x0e\x32\x17.ServoControl.Operation\x12\x0b\n\x03val\x18\x03 \x01(\r\"8\n\tOperation\x12\n\n\x06\x41TTACH\x10\x00\x12\n\n\x06\x44\x45TACH\x10\x01\x12\t\n\x05WRITE\x10\x02\x12\x08\n\x04READ\x10\x03\"\xdd\x01\n\x07Message\x12\x1e\n\tping_test\x18\x01 \x01(\x0b\x32\t.PingTestH\x00\x12+\n\x10pin_mode_control\x18\x02 \x01(\x0b\x32\x0f.PinModeControlH\x00\x12%\n\rio_read_write\x18\x03 \x01(\x0b\x32\x0c.IOReadWriteH\x00\x12&\n\rservo_control\x18\x04 \x01(\x0b\x32\r.ServoControlH\x00\x12\x16\n\x0cthis_address\x18\x05 \x01(\rH\x00\x12\x17\n\rsystem_uptime\x18\x06 \x01(\rH\x00\x42\x05\n\x03msg')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -304,6 +304,20 @@ _MESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='this_address', full_name='Message.this_address', index=4,
+      number=5, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='system_uptime', full_name='Message.system_uptime', index=5,
+      number=6, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -319,7 +333,7 @@ _MESSAGE = _descriptor.Descriptor(
       index=0, containing_type=None, fields=[]),
   ],
   serialized_start=474,
-  serialized_end=646,
+  serialized_end=695,
 )
 
 _PINMODECONTROL.fields_by_name['mode'].enum_type = _PINMODECONTROL_MODE
@@ -344,6 +358,12 @@ _MESSAGE.fields_by_name['io_read_write'].containing_oneof = _MESSAGE.oneofs_by_n
 _MESSAGE.oneofs_by_name['msg'].fields.append(
   _MESSAGE.fields_by_name['servo_control'])
 _MESSAGE.fields_by_name['servo_control'].containing_oneof = _MESSAGE.oneofs_by_name['msg']
+_MESSAGE.oneofs_by_name['msg'].fields.append(
+  _MESSAGE.fields_by_name['this_address'])
+_MESSAGE.fields_by_name['this_address'].containing_oneof = _MESSAGE.oneofs_by_name['msg']
+_MESSAGE.oneofs_by_name['msg'].fields.append(
+  _MESSAGE.fields_by_name['system_uptime'])
+_MESSAGE.fields_by_name['system_uptime'].containing_oneof = _MESSAGE.oneofs_by_name['msg']
 DESCRIPTOR.message_types_by_name['PingTest'] = _PINGTEST
 DESCRIPTOR.message_types_by_name['PinModeControl'] = _PINMODECONTROL
 DESCRIPTOR.message_types_by_name['IOReadWrite'] = _IOREADWRITE

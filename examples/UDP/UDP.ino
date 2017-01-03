@@ -37,7 +37,7 @@ void loop() {
   if (!req_len)
     return;
 
-  if (process_message(req, req_len, &resp, &resp_len)) {
+  if (ArduinoControl.process_message(req, req_len, &resp, &resp_len)) {
     wifiUDP.beginPacket(wifiUDP.remoteIP(), wifiUDP.remotePort());
     wifiUDP.write(resp, resp_len);
     wifiUDP.endPacket();

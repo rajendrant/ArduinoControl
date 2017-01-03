@@ -18,6 +18,11 @@ void setup()
   if (!nrf24.setTransmitAddress((uint8_t*)"gat", 3))
     Serial.println("setTransmitAddress failed");
 
+
+  uint32_t address = 0;
+  nrf24.getThisAddress((uint8_t*)&address, 3);
+  ArduinoControl.set_this_address(address);
+
   Serial.println("initialised");
 }
 
@@ -32,7 +37,7 @@ void loop()
   if (req_len) {
     Serial.println(micros());
     Serial.println(req_len);
-    if (process_message(req, req_len, &resp, &resp_len)) {
+    if (ArduinoControl.process_message(req, req_len, &resp, &resp_len)) {
       Serial.println(resp_len);
       Serial.println(resp[0]);
       Serial.println(resp[1]);

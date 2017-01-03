@@ -34,6 +34,22 @@ class BoardClient(object):
     def get_servo(self, pin):
         return Servo(pin, self)
 
+    def get_this_address():
+        m = message_pb2.Message()
+        m.this_address = 0
+        resp = self.send_and_recv(m)
+        if resp and resp.HasField('this_address'):
+            return resp.this_address
+        return 0
+    
+    def get_system_uptime():
+        m = message_pb2.Message()
+        m.system_uptime = 0
+        resp = self.send_and_recv(m)
+        if resp and resp.HasField('system_uptime'):
+            return resp.system_uptime
+        return 0
+
     def send_and_recv(self, msg):
         for connect_tries in range(3):
             if not self.sock.is_connected():

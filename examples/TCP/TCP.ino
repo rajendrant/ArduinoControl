@@ -42,7 +42,7 @@ void loop() {
     if (client && client->connected() && client->available()) {
       req_len = client->read();
       if (client->readBytes(req, req_len) == req_len) {
-        if (process_message(req, req_len, &resp, &resp_len)) {
+        if (ArduinoControl.process_message(req, req_len, &resp, &resp_len)) {
           client->write((uint8_t*)resp, resp_len);
         }
       }
