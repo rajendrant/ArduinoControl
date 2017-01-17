@@ -1,4 +1,4 @@
-import message_pb2
+from message import *
 import myutil
 import random
 import socket
@@ -11,7 +11,7 @@ class BoardClient(object):
         self.port = port
         self.init_sock()
 
-    def init_sock():
+    def init_sock(self):
         raise NotImplementedError
 
     def ping_test(self):
@@ -21,10 +21,9 @@ class BoardClient(object):
         latency time in milliseconds.
         """
         start_time=time.time()
-        m = message_pb2.Message()
-        m.ping_test.num = random.randrange(1000000)
+        m = PingTest(random.randrange(1000000))
         resp = self.send_and_recv(m)
-        if resp and resp.HasField('ping_test') and m.ping_test.num==resp.ping_test.num:
+        if resp and m.ping_test==resp.ping_test:
             return (time.time()-start_time)*1000
         return None
 
@@ -34,19 +33,17 @@ class BoardClient(object):
     def get_servo(self, pin):
         return Servo(pin, self)
 
-    def get_this_address():
-        m = message_pb2.Message()
-        m.this_address = 0
+    def get_this_address(self):
+        m = ThisAddress(0)
         resp = self.send_and_recv(m)
-        if resp and resp.HasField('this_address'):
+        if resp:
             return resp.this_address
         return 0
     
-    def get_system_uptime():
-        m = message_pb2.Message()
-        m.system_uptime = 0
+    def get_system_uptime(self):
+        m = SystemUptime(0)
         resp = self.send_and_recv(m)
-        if resp and resp.HasField('system_uptime'):
+        if resp:
             return resp.system_uptime
         return 0
 
@@ -69,15 +66,13 @@ class BoardClient(object):
         raise socket.error('send_and_recv failed')
 
     def send_msg(self, msg):
-        self.sock.send_msg(msg.SerializeToString())
+        self.sock.send_msg(msg.pack())
 
     def recv_msg(self):
         msg = self.sock.recv_msg()
         if not msg:
             return None
-        m = message_pb2.Message()
-        m.ParseFromString(msg)
-        return m
+        return unpack(msg)
 
 class TCPClient(BoardClient):
     def __init__(self, host, port):
@@ -107,31 +102,29 @@ class NRF24Client(UDPClient):
         self.nrf24_id = nrf24_id
 
     def send_msg(self, msg):
-        self.sock.send_msg(self.nrf24_id + msg.SerializeToString())
+        self.sock.send_msg(self.nrf24_id + msg.pack())
 
 class BoardPin:
     def __init__(self, pin, client):
         self.pin = pin
         self.client = client
     def mode_input(self):
-        self._set_mode(message_pb2.PinModeControl.INPUT)
+        self._set_mode(PinModeControl.Mode.INPUT)
     def mode_input_pullup(self):
-        self._set_mode(message_pb2.PinModeControl.INPUT_PULLUP)
+        self._set_mode(PinModeControl.Mode.INPUT_PULLUP)
     def mode_output(self):
-        self._set_mode(message_pb2.PinModeControl.OUTPUT)
+        self._set_mode(PinModeControl.Mode.OUTPUT)
     def _set_mode(self, mode):
-        m = message_pb2.Message()
-        m.pin_mode_control = message_pb2.PinModeControl(pin=self.pin, mode=mode)
-        return self.client.send_and_recv(m)
+        return self.client.send_and_recv(PinModeControl(pin=self.pin, mode=mode))
 
     def digital_read(self):
-        return self._io_read(message_pb2.IOReadWrite.DIGITAL_READ)
+        return self._io_read(IOReadWrite.Operation.DIGITAL_READ)
     def analog_read(self):
-        return self._io_read(message_pb2.IOReadWrite.ANALOG_READ)
+        return self._io_read(IOReadWrite.Operation.ANALOG_READ)
     def digital_write(self, val):
-        return self._io_write(message_pb2.IOReadWrite.DIGITAL_WRITE, val)
+        return self._io_write(IOReadWrite.Operation.DIGITAL_WRITE, val)
     def analog_write(self):
-        return self._io_write(message_pb2.IOReadWrite.ANALOG_WRITE)
+        return self._io_write(IOReadWrite.Operation.ANALOG_WRITE)
     def _io_read(self, oper):
         m = self._io(oper)
         if m and m.HasField('io_read_write'):
@@ -141,34 +134,25 @@ class BoardPin:
         m = self._io(oper, val)
         return m and m.HasField('io_read_write')
     def _io(self, oper, val=0):
-        m = message_pb2.Message()
-        m.io_read_write.pin = self.pin
-        m.io_read_write.operation = oper
-        m.io_read_write.val = val
-        return self.client.send_and_recv(m)
+        return self.client.send_and_recv(IOReadWrite(pin=self.pin, operation=oper, val=val))
 
 class Servo:
     def __init__(self, pin, client):
         self.pin = pin
         self.client = client
     def attach(self):
-        m = self._io(message_pb2.ServoControl.ATTACH)
+        m = self._io(ServoControl.Operation.ATTACH)
         return m and m.HasField('servo_control')
     def detach(self):
-        m = self._io(message_pb2.ServoControl.DETACH)
+        m = self._io(ServoControl.Operation.DETACH)
         return m and m.HasField('servo_control')
     def write(self, val):
-        m = self._io(message_pb2.ServoControl.WRITE, val)
+        m = self._io(ServoControl.Operation.WRITE, val)
         return m and m.HasField('servo_control')
     def read(self):
-        m = self._io(message_pb2.ServoControl.READ)
+        m = self._io(ServoControl.Operation.READ)
         if m and m.HasField('servo_control'):
             return m.servo_control.val
         return -1
     def _io(self, oper, val=0):
-        m = message_pb2.Message()
-        m.servo_control.pin = self.pin
-        m.servo_control.operation = oper
-        m.servo_control.val = val
-        return self.client.send_and_recv(m)
-
+        return self.client.send_and_recv(ServoControl(pin=self.pin, operation=oper, val=val))

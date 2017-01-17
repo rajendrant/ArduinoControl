@@ -35,16 +35,16 @@ void loop()
   nrf24.powerUpRx();
   req_len = nrf24.waitAndRecv(req, 600);
   if (req_len) {
-    Serial.println(micros());
+    Serial.println("req");
     Serial.println(req_len);
     if (ArduinoControl.process_message(req, req_len, &resp, &resp_len)) {
+      /*Serial.println("response");
       Serial.println(resp_len);
       Serial.println(resp[0]);
       Serial.println(resp[1]);
       Serial.println(resp[2]);
-      Serial.println(resp[3]);
+      Serial.println(resp[3]);*/
       nrf24.sendBlocking(resp, resp_len);
-      Serial.println(micros());
     }
   }
 }
