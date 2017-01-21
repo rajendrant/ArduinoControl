@@ -32,10 +32,10 @@ class PinModeControl:
 
     @staticmethod
     def unpack(buf):
-        return PinModeControl(*struct.unpack('!BBB', buf))
+        return PinModeControl(*struct.unpack('!BB', buf))
 
     def pack(self):
-        return struct.pack('!BBBB', Type.PIN_MODE_CONTROL, self.pin, self.mode)
+        return struct.pack('!BBB', Type.PIN_MODE_CONTROL, self.pin, self.mode)
 
 class IOReadWrite:
     class Operation(IntEnum):
@@ -65,7 +65,7 @@ class ServoControl:
     
     def __init__(self, pin=0, operation=Operation.ATTACH, val=0):
         self.pin = pin
-        self.Operation = Operation
+        self.operation = operation
         self.val = val
 
     @staticmethod

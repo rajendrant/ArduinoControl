@@ -20,6 +20,17 @@ void connectToWiFi() {
   digitalWrite(0, HIGH);
 }
 
+void checkConnectivity() {
+  static uint32_t last_check = 0;
+  if (WiFi.status() != WL_CONNECTED) {
+    // If disconnected, attempt to connect every 10 seconds.
+    if (millis() - last_check > 10000) {
+      connectToWiFi();
+      last_check = millis();
+    }
+  }
+}
+
 void setup() {
   //Serial.begin(115200);
   connectToWiFi();
@@ -29,6 +40,8 @@ void loop() {
   uint8_t req[128];
   uint8_t *resp;
   uint8_t req_len, resp_len;
+
+  checkConnectivity();
 
   if (!wifiUDP.parsePacket())
     return;

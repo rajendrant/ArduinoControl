@@ -127,12 +127,12 @@ class BoardPin:
         return self._io_write(IOReadWrite.Operation.ANALOG_WRITE)
     def _io_read(self, oper):
         m = self._io(oper)
-        if m and m.HasField('io_read_write'):
+        if m:
             return m.io_read_write.val
         return -1
     def _io_write(self, oper, val):
         m = self._io(oper, val)
-        return m and m.HasField('io_read_write')
+        return not not m
     def _io(self, oper, val=0):
         return self.client.send_and_recv(IOReadWrite(pin=self.pin, operation=oper, val=val))
 
@@ -142,16 +142,16 @@ class Servo:
         self.client = client
     def attach(self):
         m = self._io(ServoControl.Operation.ATTACH)
-        return m and m.HasField('servo_control')
+        return not not m
     def detach(self):
         m = self._io(ServoControl.Operation.DETACH)
-        return m and m.HasField('servo_control')
+        return not not m
     def write(self, val):
         m = self._io(ServoControl.Operation.WRITE, val)
-        return m and m.HasField('servo_control')
+        return not not m
     def read(self):
         m = self._io(ServoControl.Operation.READ)
-        if m and m.HasField('servo_control'):
+        if m:
             return m.servo_control.val
         return -1
     def _io(self, oper, val=0):
