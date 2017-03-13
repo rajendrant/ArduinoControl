@@ -6,9 +6,7 @@ import struct
 import time
 
 class BoardClient(object):
-    def __init__(self, host, port):
-        self.host = host
-        self.port = port
+    def __init__(self):
         self.init_sock()
 
     def init_sock(self):
@@ -76,7 +74,9 @@ class BoardClient(object):
 
 class TCPClient(BoardClient):
     def __init__(self, host, port):
-        super(TCPClient, self).__init__(host, port)
+        self.host = host
+        self.port = port
+        super(TCPClient, self).__init__()
 
     def init_sock(self):
         for tries in range(4):
@@ -91,7 +91,9 @@ class TCPClient(BoardClient):
 
 class UDPClient(BoardClient):
     def __init__(self, host, port):
-        super(UDPClient, self).__init__(host, port)
+        self.host = host
+        self.port = port
+        super(UDPClient, self).__init__()
 
     def init_sock(self):
         self.sock = myutil.UdpSocket(self.host, self.port)
