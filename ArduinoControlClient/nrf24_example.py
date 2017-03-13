@@ -7,7 +7,8 @@ def ping_test(b):
         print 'ping_test', 'PASSED latency=%d'%(latency) if latency else 'FAILED'
         time.sleep(0.5)
 
-b = ArduinoControlClient.NRF24Client('127.0.0.1', 6666, 's-1')
+#b = ArduinoControlClient.NRF24Client('127.0.0.1', 6666, 's-1')
+b = ArduinoControlClient.NRF24Client('192.168.1.105', 6666, 's-1')
 
 ping_test(b)
 print b.get_this_address()

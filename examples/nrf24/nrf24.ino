@@ -17,7 +17,8 @@ void setup()
     Serial.println("setThisAddress failed");
   if (!nrf24.setTransmitAddress((uint8_t*)"gat", 3))
     Serial.println("setTransmitAddress failed");
-
+  if (!nrf24.setBroadcastAddress((uint8_t*)"mux", 3))
+    Serial.println("setBroadcastAddress failed");
 
   uint32_t address = 0;
   nrf24.getThisAddress((uint8_t*)&address, 3);

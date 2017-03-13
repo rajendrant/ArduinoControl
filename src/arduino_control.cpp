@@ -124,6 +124,15 @@ bool ArduinoControlClass::process_message(const uint8_t *req, uint8_t req_len, u
     handle_system_uptime();
     *resp_len = 1+sizeof(uint32_t);
     break;
+  case Message::TLV_MESSAGE:
+    if (!fn_tlv_handler) return false;
+    if (req_len < 1+2) return false;
+    TLVMessage *m = &msg->msg.tlv_message;
+    resp.which_msg = Message::TLV_MESSAGE;
+    resp.msg.tlv_message.type = m->type;
+    resp.msg.tlv_message.len = fn_tlv_handler(m->type, m->len, m->val, resp.msg.tlv_message.val);
+    *resp_len = 1+2+resp.msg.tlv_message.len;
+    break;
   }
 
   *resp_buf = (uint8_t*)&resp;
