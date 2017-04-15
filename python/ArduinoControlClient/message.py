@@ -8,6 +8,9 @@ class Type(IntEnum):
     SERVO_CONTROL = 3
     THIS_ADDRESS = 4
     SYSTEM_UPTIME = 5
+    TLV_MESSAGE = 6
+    LOW_POWER_SLEEP_MODE = 7
+    LOW_POWER_WAKE_PULSE = 8
 
 class PingTest:
     def __init__(self, ping_test=0):
@@ -97,6 +100,31 @@ class SystemUptime:
     def pack(self):
         return struct.pack('!BI', Type.SYSTEM_UPTIME, self.system_uptime)
 
+class TLVMessage:
+    def __init__(self, typee, lenn, val):
+        self.typee=typee
+        self.lenn=lenn
+        self.val=val
+
+    @staticmethod
+    def unpack(buf):
+        typee, lenn = struct.unpack('!BB', buf[:2])
+        return TLVMessage(typee, lenn, buf[2:])
+
+    def pack(self):
+        return struct.pack('!BBB', Type.TLV_MESSAGE, self.typee, self.lenn)+self.val
+
+class LowPower:
+    def __init__(self, mode):
+        self.low_power_mode = mode
+
+    @staticmethod
+    def unpack(buf):
+        return LowPower(*struct.unpack('!?', buf))
+
+    def pack(self):
+        return struct.pack('!B?', Type.LOW_POWER_SLEEP_MODE, self.low_power_mode)
+
 def unpack(buf):
     msgtype = struct.unpack('!B', buf[0])[0]
     if msgtype == Type.PING_TEST:
@@ -111,5 +139,8 @@ def unpack(buf):
         return ThisAddress.unpack(buf[1:])
     elif msgtype == Type.SYSTEM_UPTIME:
         return SystemUptime.unpack(buf[1:])
+    elif msgtype == Type.TLV_MESSAGE:
+        return TLVMessage.unpack(buf[1:])
+    elif msgtype == Type.LOW_POWER_SLEEP_MODE:
+        return LowPower.unpack(buf[1:])
     return None
-

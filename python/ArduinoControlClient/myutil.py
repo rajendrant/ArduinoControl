@@ -28,7 +28,8 @@ class UdpSocket(object):
         self.sock.sendto(data, (self.host, self.port))
         return True
 
-    def recv_msg(self, timeout=2000):
+    def recv_msg(self, timeout=2):
+        self.sock.settimeout(timeout)
         data, addr = self.sock.recvfrom(1024)
         return data
 

@@ -1,8 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 
-const char* ssid     = "";
-const char* password = "";
+const char* ssid     = "Ajarirus";
+const char* password = "SeattleBallard";
 int port_to_listen = 6666;
 
 WiFiUDP wifiUDP;
@@ -52,3 +52,4 @@ uint8_t wifi_udp_send_response(uint8_t *resp, uint8_t resp_len) {
   wifiUDP.write(resp, resp_len);
   wifiUDP.endPacket();
 }
+

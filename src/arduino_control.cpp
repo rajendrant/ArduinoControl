@@ -1,6 +1,7 @@
 #include "arduino_control.h"
 
 #include <Servo.h>
+#include <EEPROM.h>
 
 #include "message.h"
 
@@ -86,7 +87,7 @@ void ArduinoControlClass::set_this_address(uint32_t address) {
   this_address = address;
 }
 
-bool ArduinoControlClass::process_message(const uint8_t *req, uint8_t req_len, uint8_t **resp_buf, uint8_t *resp_len) {
+bool ArduinoControlClass::process_message(const void *req, uint8_t req_len, uint8_t **resp_buf, uint8_t *resp_len) {
   Message *msg = (Message*)req;
   MSG_INIT_ZERO(resp);
 
@@ -127,14 +128,67 @@ bool ArduinoControlClass::process_message(const uint8_t *req, uint8_t req_len, u
   case Message::TLV_MESSAGE:
     if (!fn_tlv_handler) return false;
     if (req_len < 1+2) return false;
-    TLVMessage *m = &msg->msg.tlv_message;
     resp.which_msg = Message::TLV_MESSAGE;
-    resp.msg.tlv_message.type = m->type;
-    resp.msg.tlv_message.len = fn_tlv_handler(m->type, m->len, m->val, resp.msg.tlv_message.val);
+    resp.msg.tlv_message.type = msg->msg.tlv_message.type;
+    resp.msg.tlv_message.len = fn_tlv_handler(msg->msg.tlv_message.type, msg->msg.tlv_message.len,
+                                              msg->msg.tlv_message.val, resp.msg.tlv_message.val);
     *resp_len = 1+2+resp.msg.tlv_message.len;
     break;
+  case Message::LOW_POWER_SLEEP_MODE:
+#ifdef ENABLE_LOW_POWER_SUPPORT
+    if (req_len != 1+sizeof(uint8_t)) return false;
+    set_low_power_sleep(msg->msg.low_power_sleep);
+    resp.which_msg = Message::LOW_POWER_SLEEP_MODE;
+    resp.msg.low_power_sleep = low_power_sleep;
+    *resp_len = 1+sizeof(uint8_t);
+    break;
+#endif
+  case Message::LOW_POWER_WAKE_PULSE:
+    return false;
   }
 
   *resp_buf = (uint8_t*)&resp;
   return true;
 }
+
+void ArduinoControlClass::init_address_from_eeprom() {
+#ifdef AVR
+  const int ADDRESS_WIDTH = 3;
+  uint8_t address[ADDRESS_WIDTH];
+  // This address is stored in EEPROM address 0-2.
+  for(int i=0; i<ADDRESS_WIDTH; i++) {
+    address[i] = EEPROM.read(i);
+  }
+  if (address[0] == 255) {
+    // Init the random seed, by reading random values from unconnected pins.
+    // http://arduino.stackexchange.com/questions/22070/powering-from-3v-coin-cell-to-vcc-using-i-o-pin-as-supply-gnd
+    long seed = micros();
+    seed ^= analogRead(A0) ^ analogRead(A3) ^ analogRead(A6);
+    seed ^= (analogRead(A1) ^ analogRead(A4) ^ analogRead(A7))<<10;
+    seed ^= (analogRead(A2) ^ analogRead(A5) ^ analogRead(A0))<<20;
+    seed ^= micros();
+    randomSeed(seed);
+
+    // Update address.
+    for(int i=0; i<ADDRESS_WIDTH; i++) {
+      address[i] = random(256);
+      EEPROM.write(i, address[i]);
+    }
+  }
+  memcpy(&this_address, address, ADDRESS_WIDTH);
+#endif
+}
+
+#ifdef ENABLE_LOW_POWER_SUPPORT
+bool ArduinoControlClass::power_down_loop(uint8_t **resp_buf, uint8_t *resp_len) {
+  if (low_power_sleep) {
+    LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);
+    resp.which_msg = Message::LOW_POWER_WAKE_PULSE;
+    resp.msg.this_address = this_address;
+    *resp_buf = (uint8_t*)&resp;
+    *resp_len = 1+4;
+    return true;
+  }
+  return false;
+}
+#endif

@@ -45,18 +45,25 @@ class BoardClient(object):
             return resp.system_uptime
         return 0
 
-    def send_and_recv(self, msg):
-        for connect_tries in range(3):
+    def get_tlv_message_response(self, typee, lenn, val):
+        m = TLVMessage(typee, lenn, val)
+        return self.send_and_recv(m)
+
+    def set_low_power_mode(self, mode):
+        return self.send_and_recv(LowPower(mode), retries=1, recv_timeout=5)
+
+    def send_and_recv(self, msg, retries=2, recv_timeout=2):
+        for _ in range(retries):
             if not self.sock.is_connected():
                 try:
                     self.init_sock()
                 except socket.error as e:
                     continue
             if self.sock.is_connected():
-                for send_tries in range(2):
+                for _ in range(retries):
                     try:
                         self.send_msg(msg)
-                        return self.recv_msg()
+                        return self.recv_msg(recv_timeout)
                     except socket.error as e:
                         print 'retrying send recv'
                         time.sleep(0.1)
@@ -66,8 +73,8 @@ class BoardClient(object):
     def send_msg(self, msg):
         self.sock.send_msg(msg.pack())
 
-    def recv_msg(self):
-        msg = self.sock.recv_msg()
+    def recv_msg(self, recv_timeout):
+        msg = self.sock.recv_msg(recv_timeout)
         if not msg:
             return None
         return unpack(msg)
@@ -104,7 +111,7 @@ class NRF24Client(UDPClient):
         self.nrf24_id = nrf24_id
 
     def send_msg(self, msg):
-        self.sock.send_msg(self.nrf24_id + msg.pack())
+        self.sock.send_msg(self.nrf24_id + '\x00' + msg.pack())
 
 class BoardPin:
     def __init__(self, pin, client):

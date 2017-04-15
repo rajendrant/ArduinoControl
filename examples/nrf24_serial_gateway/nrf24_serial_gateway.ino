@@ -9,7 +9,7 @@ void setup()
     Serial.println("NRF24 init failed");
   if (!nrf24.setChannel(1))
     Serial.println("setChannel failed");
-  if (!nrf24.setRF(NRF24::NRF24DataRate2Mbps, NRF24::NRF24TransmitPowerm18dBm))
+  if (!nrf24.setRF(NRF24::NRF24DataRate1Mbps, NRF24::NRF24TransmitPower0dBm))
     Serial.println("setRF failed");
 
   if (!nrf24.setThisAddress((uint8_t*)"gat", 3))
@@ -57,22 +57,26 @@ void send_response(uint8_t* resp, uint8_t resp_len) {
   Serial.println();
 }
 
+uint8_t nrf24_recv_handler(uint8_t *msg, uint8_t msg_len) {
+  nrf24.powerUpRx();
+  return nrf24.waitAndRecv(msg, 400);
+}
+
+bool nrf24_send_handler(const uint8_t *msg, uint8_t msg_len, const uint8_t *tx_addr) {
+  nrf24.setTransmitAddress(tx_addr, 3);
+  return nrf24.sendBlocking(msg, msg_len);
+}
+
+ArduinoControlGateway gateway(nrf24_recv_handler, nrf24_send_handler);
+
 void loop()
 {
   uint8_t req[128];
-  uint8_t resp[128];
+  uint8_t *resp;
   uint8_t req_len, resp_len;
 
   req_len = recv_request(req);
-  if (!req_len)
-    return;
-
-  nrf24.setTransmitAddress(req, 3);
-  nrf24.sendBlocking(req+3, req_len-3);
-
-  nrf24.powerUpRx();
-  resp_len = nrf24.waitAndRecv(resp, 400);
-  if (resp_len) {
+  if (req_len && gateway.process_message(req, req_len, &resp, &resp_len) && resp_len) {
     send_response(resp, resp_len);
   }
 }
