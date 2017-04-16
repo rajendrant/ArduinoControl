@@ -43,7 +43,7 @@ void loop()
   uint8_t req_len, resp_len;
 
   nrf24.powerUpRx();
-  req_len = nrf24.waitAndRecv(req, 600);
+  req_len = nrf24.waitAndRecv(req, 4);
   if (req_len) {
     Serial.print("req ");
     Serial.println(req_len);
@@ -66,6 +66,9 @@ void loop()
       nrf24.powerUpTx();
       nrf24.setTransmitAddress(tx_address, 3);
       nrf24.sendNoAck(resp, resp_len);
+      nrf24.waitPacketSent();
+      nrf24.sendNoAck(resp, resp_len);
+      nrf24.waitPacketSent();
       nrf24.flushTx();
     }
   }

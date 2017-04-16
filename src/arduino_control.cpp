@@ -182,11 +182,11 @@ void ArduinoControlClass::init_address_from_eeprom() {
 #ifdef ENABLE_LOW_POWER_SUPPORT
 bool ArduinoControlClass::power_down_loop(uint8_t **resp_buf, uint8_t *resp_len) {
   if (low_power_sleep) {
-    LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);
+    LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF);
     resp.which_msg = Message::LOW_POWER_WAKE_PULSE;
     resp.msg.this_address = this_address;
     *resp_buf = (uint8_t*)&resp;
-    *resp_len = 1+4;
+    *resp_len = 1;
     return true;
   }
   return false;

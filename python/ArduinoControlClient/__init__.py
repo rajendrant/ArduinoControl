@@ -50,7 +50,7 @@ class BoardClient(object):
         return self.send_and_recv(m)
 
     def set_low_power_mode(self, mode):
-        return self.send_and_recv(LowPower(mode), retries=1, recv_timeout=5)
+        return self.send_and_recv(LowPower(mode), recv_timeout=5)
 
     def send_and_recv(self, msg, retries=2, recv_timeout=2):
         for _ in range(retries):

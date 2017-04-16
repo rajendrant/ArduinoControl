@@ -37,6 +37,7 @@ bool ArduinoControlGateway::process_message(const void *req, uint8_t req_len, ui
     while(!send_handler(msg, 2, tx_addr) && --retries) {
       wdt_reset();
       *resp_len = recv_handler(resp_buf, sizeof(resp_buf));
+      delay(1);
       // Wait for the device to send LOW_POWER_WAKE_PULSE.
     }
     if (retries) {
