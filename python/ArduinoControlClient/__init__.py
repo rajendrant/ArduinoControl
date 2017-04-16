@@ -45,8 +45,13 @@ class BoardClient(object):
             return resp.system_uptime
         return 0
 
-    def get_tlv_message_response(self, typee, lenn, val):
-        m = TLVMessage(typee, lenn, val)
+    def get_tlv_message_response_by_format(self, typee, req_fmt, resp_fmt, *req):
+        req = struct.pack(req_fmt, *req)
+        resp = self.get_tlv_message_response(typee, req)
+        return struct.unpack(resp_fmt, resp.val)
+
+    def get_tlv_message_response(self, typee, val):
+        m = TLVMessage(typee, val)
         return self.send_and_recv(m)
 
     def set_low_power_mode(self, mode):

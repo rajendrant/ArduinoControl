@@ -125,15 +125,6 @@ bool ArduinoControlClass::process_message(const void *req, uint8_t req_len, uint
     handle_system_uptime();
     *resp_len = 1+sizeof(uint32_t);
     break;
-  case Message::TLV_MESSAGE:
-    if (!fn_tlv_handler) return false;
-    if (req_len < 1+2) return false;
-    resp.which_msg = Message::TLV_MESSAGE;
-    resp.msg.tlv_message.type = msg->msg.tlv_message.type;
-    resp.msg.tlv_message.len = fn_tlv_handler(msg->msg.tlv_message.type, msg->msg.tlv_message.len,
-                                              msg->msg.tlv_message.val, resp.msg.tlv_message.val);
-    *resp_len = 1+2+resp.msg.tlv_message.len;
-    break;
   case Message::LOW_POWER_SLEEP_MODE:
 #ifdef ENABLE_LOW_POWER_SUPPORT
     if (req_len != 1+sizeof(uint8_t)) return false;
@@ -145,6 +136,15 @@ bool ArduinoControlClass::process_message(const void *req, uint8_t req_len, uint
 #endif
   case Message::LOW_POWER_WAKE_PULSE:
     return false;
+  default:
+    if ((msg->which_msg&0xF) == Message::TLV_MESSAGE) {
+      if (!fn_tlv_handler) return false;
+      if (req_len < 1) return false;
+      resp.which_msg = msg->which_msg;
+      *resp_len = 1 + fn_tlv_handler((msg->which_msg&0xF0)>>4, req_len-1,
+                                     msg->msg.tlv_message, resp.msg.tlv_message);
+    }
+    break;
   }
 
   *resp_buf = (uint8_t*)&resp;

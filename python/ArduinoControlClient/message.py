@@ -101,18 +101,17 @@ class SystemUptime:
         return struct.pack('!BI', Type.SYSTEM_UPTIME, self.system_uptime)
 
 class TLVMessage:
-    def __init__(self, typee, lenn, val):
+    def __init__(self, typee, val):
+        assert typee <= 0xF
         self.typee=typee
-        self.lenn=lenn
         self.val=val
 
     @staticmethod
-    def unpack(buf):
-        typee, lenn = struct.unpack('!BB', buf[:2])
-        return TLVMessage(typee, lenn, buf[2:])
+    def unpack(msgtype, buf):
+        return TLVMessage((msgtype&0xF0)>>4, buf)
 
     def pack(self):
-        return struct.pack('!BBB', Type.TLV_MESSAGE, self.typee, self.lenn)+self.val
+        return struct.pack('!B', Type.TLV_MESSAGE|(self.typee<<4))+self.val
 
 class LowPower:
     def __init__(self, mode):
@@ -139,8 +138,8 @@ def unpack(buf):
         return ThisAddress.unpack(buf[1:])
     elif msgtype == Type.SYSTEM_UPTIME:
         return SystemUptime.unpack(buf[1:])
-    elif msgtype == Type.TLV_MESSAGE:
-        return TLVMessage.unpack(buf[1:])
+    elif (msgtype&0xF) == Type.TLV_MESSAGE:
+        return TLVMessage.unpack(msgtype, buf[1:])
     elif msgtype == Type.LOW_POWER_SLEEP_MODE:
         return LowPower.unpack(buf[1:])
     return None
