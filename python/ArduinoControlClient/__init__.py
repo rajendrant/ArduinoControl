@@ -54,9 +54,6 @@ class BoardClient(object):
         m = TLVMessage(typee, val)
         return self.send_and_recv(m)
 
-    def set_low_power_mode(self, mode):
-        return self.send_and_recv(LowPower(mode), recv_timeout=5)
-
     def send_and_recv(self, msg, retries=2, recv_timeout=2):
         for _ in range(retries):
             if not self.sock.is_connected():
@@ -115,8 +112,13 @@ class NRF24Client(UDPClient):
         super(NRF24Client, self).__init__(gateway_host, gateway_port)
         self.nrf24_id = nrf24_id
 
-    def send_msg(self, msg):
-        self.sock.send_msg(self.nrf24_id + '\x00' + msg.pack())
+    def set_low_power_mode(self, mode):
+        return self.send_and_recv(TLVMessage(CommonTLVMessageType.LOW_POWER_SLEEP_MODE, \
+                                             '\x01' if mode else '\x00'), recv_timeout=5)
+
+    def send_and_recv(self, msg, retries=2, recv_timeout=2):
+        gateway_msg = GatewayMessageHeader(self.nrf24_id, retries, recv_timeout*3, msg)
+        return super(NRF24Client, self).send_and_recv(gateway_msg, retries, recv_timeout)
 
 class BoardPin:
     def __init__(self, pin, client):

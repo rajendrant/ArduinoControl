@@ -43,8 +43,6 @@ typedef struct __attribute__((__packed__)) Message__ {
     THIS_ADDRESS = 4,
     SYSTEM_UPTIME = 5,
     TLV_MESSAGE = 6,
-    LOW_POWER_SLEEP_MODE = 7,
-    LOW_POWER_WAKE_PULSE = 8,
   };
   uint8_t which_msg;
   union {
@@ -55,6 +53,11 @@ typedef struct __attribute__((__packed__)) Message__ {
     uint32_t this_address;
     uint32_t system_uptime;
     uint8_t tlv_message[32];
-    uint8_t low_power_sleep;
   } msg;
 } Message;
+
+typedef struct __attribute__((__packed__)) GatewayMessageHeader__ {
+  uint32_t forward_address;
+  uint8_t retry; // 4 bit send_retry, 4 bit recv_retry.
+  Message msg[0];
+} GatewayMessageHeader;

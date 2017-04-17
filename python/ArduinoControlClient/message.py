@@ -9,8 +9,6 @@ class Type(IntEnum):
     THIS_ADDRESS = 4
     SYSTEM_UPTIME = 5
     TLV_MESSAGE = 6
-    LOW_POWER_SLEEP_MODE = 7
-    LOW_POWER_WAKE_PULSE = 8
 
 class PingTest:
     def __init__(self, ping_test=0):
@@ -113,16 +111,18 @@ class TLVMessage:
     def pack(self):
         return struct.pack('!B', Type.TLV_MESSAGE|(self.typee<<4))+self.val
 
-class LowPower:
-    def __init__(self, mode):
-        self.low_power_mode = mode
+class CommonTLVMessageType(IntEnum):
+    LOW_POWER_SLEEP_MODE = 0
+    LOW_POWER_WAKE_PULSE = 1
 
-    @staticmethod
-    def unpack(buf):
-        return LowPower(*struct.unpack('!?', buf))
+class GatewayMessageHeader:
+    def __init__(self, address, send_retry, recv_retry, msg):
+        self.address = address + '\x00'
+        self.retry = (send_retry<<4) | recv_retry
+        self.msg = msg
 
     def pack(self):
-        return struct.pack('!B?', Type.LOW_POWER_SLEEP_MODE, self.low_power_mode)
+        return self.address + struct.pack('B', self.retry) + self.msg.pack()
 
 def unpack(buf):
     msgtype = struct.unpack('!B', buf[0])[0]
@@ -140,6 +140,4 @@ def unpack(buf):
         return SystemUptime.unpack(buf[1:])
     elif (msgtype&0xF) == Type.TLV_MESSAGE:
         return TLVMessage.unpack(msgtype, buf[1:])
-    elif msgtype == Type.LOW_POWER_SLEEP_MODE:
-        return LowPower.unpack(buf[1:])
     return None

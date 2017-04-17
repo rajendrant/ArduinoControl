@@ -125,18 +125,8 @@ bool ArduinoControlClass::process_message(const void *req, uint8_t req_len, uint
     handle_system_uptime();
     *resp_len = 1+sizeof(uint32_t);
     break;
-  case Message::LOW_POWER_SLEEP_MODE:
-#ifdef ENABLE_LOW_POWER_SUPPORT
-    if (req_len != 1+sizeof(uint8_t)) return false;
-    set_low_power_sleep(msg->msg.low_power_sleep);
-    resp.which_msg = Message::LOW_POWER_SLEEP_MODE;
-    resp.msg.low_power_sleep = low_power_sleep;
-    *resp_len = 1+sizeof(uint8_t);
-    break;
-#endif
-  case Message::LOW_POWER_WAKE_PULSE:
-    return false;
   default:
+    *resp_len = 0;
     if ((msg->which_msg&0xF) == Message::TLV_MESSAGE) {
       if (!fn_tlv_handler) return false;
       if (req_len < 1) return false;
@@ -178,17 +168,3 @@ void ArduinoControlClass::init_address_from_eeprom() {
   memcpy(&this_address, address, ADDRESS_WIDTH);
 #endif
 }
-
-#ifdef ENABLE_LOW_POWER_SUPPORT
-bool ArduinoControlClass::power_down_loop(uint8_t **resp_buf, uint8_t *resp_len) {
-  if (low_power_sleep) {
-    LowPower.powerDown(SLEEP_4S, ADC_OFF, BOD_OFF);
-    resp.which_msg = Message::LOW_POWER_WAKE_PULSE;
-    resp.msg.this_address = this_address;
-    *resp_buf = (uint8_t*)&resp;
-    *resp_len = 1;
-    return true;
-  }
-  return false;
-}
-#endif

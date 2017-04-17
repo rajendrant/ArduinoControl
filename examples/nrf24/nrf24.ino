@@ -31,8 +31,6 @@ void setup()
   nrf24.getThisAddress((uint8_t*)&address, 3);
   ArduinoControl.set_this_address(address);
 
-  ArduinoControl.set_low_power_sleep(true);
-
   Serial.println("initialised");
 }
 
@@ -43,7 +41,7 @@ void loop()
   uint8_t req_len, resp_len;
 
   nrf24.powerUpRx();
-  req_len = nrf24.waitAndRecv(req, 4);
+  req_len = nrf24.waitAndRecv(req, 400);
   if (req_len) {
     Serial.print("req ");
     Serial.println(req_len);
@@ -57,19 +55,6 @@ void loop()
       nrf24.setTransmitAddress(tx_address, 3);
       if(!nrf24.sendBlocking(resp, resp_len))
         Serial.println("send failed");
-    }
-  }
-  if (ArduinoControl.get_low_power_sleep()) {
-    nrf24.powerDown();
-    if (ArduinoControl.power_down_loop(&resp, &resp_len) && resp_len) {
-      Serial.println("wake pulse");
-      nrf24.powerUpTx();
-      nrf24.setTransmitAddress(tx_address, 3);
-      nrf24.sendNoAck(resp, resp_len);
-      nrf24.waitPacketSent();
-      nrf24.sendNoAck(resp, resp_len);
-      nrf24.waitPacketSent();
-      nrf24.flushTx();
     }
   }
 }
