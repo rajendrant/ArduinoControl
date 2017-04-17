@@ -12,8 +12,11 @@ void setup()
 {
   Serial.begin(115200);
   
-  if (!nrf24_setup(pin, true, NULL, this_address, tx_address, mux_address))
+  if (!nrf24_setup(pin, true, NULL))
     Serial.println("init failed");
+
+  if (!nrf24_setup_addresses(this_address, tx_address, mux_address))
+    Serial.println("init address failed");
 
   Serial.println("initialised");
 }
