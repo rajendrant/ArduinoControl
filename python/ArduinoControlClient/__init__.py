@@ -112,11 +112,7 @@ class NRF24Client(UDPClient):
         super(NRF24Client, self).__init__(gateway_host, gateway_port)
         self.nrf24_id = nrf24_id
 
-    def set_low_power_mode(self, mode):
-        return self.send_and_recv(TLVMessage(CommonTLVMessageType.LOW_POWER_SLEEP_MODE, \
-                                             '\x01' if mode else '\x00'), recv_timeout=5)
-
-    def send_and_recv(self, msg, retries=2, recv_timeout=2):
+    def send_and_recv(self, msg, retries=2, recv_timeout=4):
         gateway_msg = GatewayMessageHeader(self.nrf24_id, retries, recv_timeout*3, msg)
         return super(NRF24Client, self).send_and_recv(gateway_msg, retries, recv_timeout)
 

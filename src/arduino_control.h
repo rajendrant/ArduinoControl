@@ -24,4 +24,6 @@ private:
 
 extern ArduinoControlClass ArduinoControl;
 
+void hexdump(uint8_t *msg, uint8_t len);
+
 #endif // ARDUINO_CONTROL_h

@@ -114,6 +114,7 @@ class TLVMessage:
 class CommonTLVMessageType(IntEnum):
     LOW_POWER_SLEEP_MODE = 0
     LOW_POWER_WAKE_PULSE = 1
+    MAX = LOW_POWER_WAKE_PULSE+1
 
 class GatewayMessageHeader:
     def __init__(self, address, send_retry, recv_retry, msg):

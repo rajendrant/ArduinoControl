@@ -36,14 +36,12 @@ void loop()
   req_len = nrf24->waitAndRecv(req, 400);
   if (req_len) {
     Serial.print("req ");
-    Serial.println(req_len);
+    //Serial.println(millis());
+    //hexdump(req, req_len);
     if (ArduinoControl.process_message(req, req_len, &resp, &resp_len)) {
-      /*Serial.println("response");
-      Serial.println(resp_len);
-      Serial.println(resp[0]);
-      Serial.println(resp[1]);
-      Serial.println(resp[2]);
-      Serial.println(resp[3]);*/
+      Serial.println("resp ");
+      //Serial.println(millis());
+      //hexdump(resp, resp_len);
       delay(1);
       nrf24->setTransmitAddress(tx_address, 3);
       if(!nrf24->sendBlocking(resp, resp_len))

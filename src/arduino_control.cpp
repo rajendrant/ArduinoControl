@@ -83,6 +83,13 @@ void handle_system_uptime() {
 
 } // namespace
 
+void hexdump(uint8_t *msg, uint8_t len) {
+  for(uint8_t i=0; i<len; i++)
+    Serial.print((uint32_t)msg[i], HEX);
+  Serial.print(" ");
+  Serial.println((uint32_t)len);
+}
+
 void ArduinoControlClass::set_this_address(uint32_t address) {
   this_address = address;
 }
