@@ -22,37 +22,47 @@ class PC(ArduinoControlClient.NRF24Client):
     def get_voltage(self):
         if self.volt_get_time+10*60 > time.time():
             return self.volt
-        self.volt_get_time = time.time()
-        s = self.get_servo(2)
-        s.attach()
-        s.write(PC.pos_pc_voltage_on)
-        time.sleep(0.2)
-        self.volt = self.send_recv_tlv(TLVMessageType.MSG_MEASURE_VOLTAGE)
-        s.write(PC.pos_pc_turn_off)
-        time.sleep(0.2)
-        s.detach()
-        return self.volt
+        try:
+            self.volt_get_time = time.time()
+            s = self.get_servo(2)
+            s.attach()
+            s.write(PC.pos_pc_voltage_on)
+            time.sleep(0.2)
+            self.volt = self.send_recv_tlv(TLVMessageType.MSG_MEASURE_VOLTAGE)
+            s.write(PC.pos_pc_turn_off)
+            time.sleep(0.2)
+            s.detach()
+            return self.volt
+        except: return (-1, -1)
 
     def is_pc_power_on(self):
-        s = self.get_servo(3)
-        return s.read() <= PC.pos_power_on
+        try:
+            s = self.get_servo(3)
+            return s.read() <= PC.pos_power_on
+        except: return False
 
     def pc_power_on(self, on):
-        s = self.get_servo(3)
-        if on == self.is_pc_power_on(): return
-        s.attach()
-        s.write(PC.pos_power_on if on else PC.pos_power_off)
-        time.sleep(0.2)
-        s.detach()
+        try:
+            s = self.get_servo(3)
+            if on == self.is_pc_power_on(): return
+            s.attach()
+            s.write(PC.pos_power_on if on else PC.pos_power_off)
+            time.sleep(0.2)
+            s.detach()
+            return True
+        except: return False
 
     def pc_turn_on(self):
-        s = self.get_servo(2)
-        s.attach()
-        s.write(PC.pos_pc_turn_on)
-        time.sleep(0.4)
-        s.write(PC.pos_pc_turn_off)
-        time.sleep(0.1)
-        s.detach()
+        try:
+            s = self.get_servo(2)
+            s.attach()
+            s.write(PC.pos_pc_turn_on)
+            time.sleep(0.4)
+            s.write(PC.pos_pc_turn_off)
+            time.sleep(0.1)
+            s.detach()
+            return True
+        except: return False
 
 b = PC('192.168.1.105', 6666, '\x3C\x99\xF9')
 
