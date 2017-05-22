@@ -164,7 +164,7 @@ class Servo:
     def read(self):
         m = self._io(ServoControl.Operation.READ)
         if m:
-            return m.servo_control.val
+            return m.val
         return -1
     def _io(self, oper, val=0):
         return self.client.send_and_recv(ServoControl(pin=self.pin, operation=oper, val=val))
